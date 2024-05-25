@@ -15,7 +15,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.Map;
+import moviebookingsystem.Booking;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -119,7 +122,7 @@ public class MovieBookingSystem {
 
                             if (choice == 'N' || choice == 'n') {
                                 //Ask if user want to continue with booking movie tickets
-                                System.out.println("\nProceed with booking ticket? (Y/N)\n");
+                                System.out.println("\nProceed with booking ticket(s)? (Y/N)\n");
                                 char bookingChoice = scan.next().charAt(0);
                                 scan.nextLine();
 
@@ -189,9 +192,10 @@ public class MovieBookingSystem {
 
                                         // Ask user to choose seat
                                         seat.chooseSeat();
+                                        
                                         System.out.println("\nBooked seat in red: \n");
                                         seat.displaySeatingArrangement();
-
+                                        
                                         // Proceed to payment
                                         System.out.println("\nPress Enter to proceed to Payment");
                                         scan.nextLine();
@@ -281,18 +285,16 @@ public class MovieBookingSystem {
                                         // Fetch booked tickets for the user
                                         String username = "";
 
-                                        System.out.println("");
-
-                                        System.out.print("\nEnter your username to view booked seat:");
+                                        System.out.print("\nEnter your username to view booked tickets:");
                                         username = scan.nextLine();
 
                                         while (username.isEmpty()) {
                                             System.out.println("Username cannot be empty. Please try again.");
-                                            System.out.print("\nEnter your username to view booked seat:");
+                                            System.out.print("\nEnter your username to view booked tickets:");
                                             username = scan.nextLine();
                                         }
 
-                                        Booking booking = new Booking(username, scan, movieMap, cinemaMap);
+                                        Booking booking = new Booking(username);
 
                                         try {
                                             Thread.sleep(1500);
@@ -316,7 +318,7 @@ public class MovieBookingSystem {
 
                                         Customer customer = new Customer(user, phoneNo, email);
                                         customer.registerNewUser();
-                                        
+
                                         System.out.println("\nBooking saved under " + user);
 
                                         continueLoop = false;
@@ -497,7 +499,7 @@ public class MovieBookingSystem {
             writer.newLine();
             writer.write("CVV: " + cardCVV);
             writer.newLine();
-            writer.write("-------------------------------");
+            writer.write("--------------------------------");
             writer.newLine(); // Add an extra newline for separation between payments
 
             writer.close();

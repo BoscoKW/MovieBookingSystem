@@ -23,12 +23,11 @@ public class Customer {
 
     public void registerNewUser() {
         try (PrintWriter printWriter = new PrintWriter(new BufferedWriter(new FileWriter("./Resources/customers.txt", true)))) {
-            printWriter.println(username + "-" + phoneNumber + "-" + emailAddress);
-            System.out.println("User registered successfully!");
+            printWriter.println("Username: " + username + "\nPhone Number: " + phoneNumber + "\nEmail Address: " + emailAddress);
+            printWriter.println("-------------------------------------------");
+            System.out.println("\nUser registered successfully!");
         } catch (IOException e) {
             System.err.println("Error registering user: " + e.getMessage());
         }
     }
 }
-
-

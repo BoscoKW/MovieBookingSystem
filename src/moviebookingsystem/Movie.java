@@ -46,6 +46,4 @@ public class Movie {
         System.out.println("Running Time: " + runningTime + " minutes");
         System.out.println("Rating: " + rating);
     }
-    
-    
 }

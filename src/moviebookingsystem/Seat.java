@@ -131,11 +131,23 @@ class Seat {
             } else {
                 current.data = "[\u001B[31mX\u001B[0m]"; // red X
                 System.out.println("\nPlease enter your username: ");
-                String name = scanner.nextLine();
+                String username = scanner.nextLine();
 
-                System.out.print("\nSeat successfully booked by " + name + ": " + rowChoice + columnChoice);
+                String seat = Character.toString(rowChoice) + columnChoice; // Convert row and column to seat format
+                updateBookings(username, seat); // Update bookings with seat format
+
+                System.out.print("\nSeat successfully booked by " + username + ": " + seat);
                 break;
             }
+        }
+    }
+
+    private void updateBookings(String username, String seat) {
+        try ( BufferedWriter writer = new BufferedWriter(new FileWriter("Resources/bookings.txt", true))) {
+            writer.write(username + "," + seat + "\n");
+        } catch (IOException e) {
+            System.out.println("An error occurred while updating bookings.");
+            e.printStackTrace();
         }
     }
 }
