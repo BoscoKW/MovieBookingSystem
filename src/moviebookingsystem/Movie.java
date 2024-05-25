@@ -11,7 +11,7 @@ import java.util.*;
  * @author mardiliza
  */
 public class Movie {
-
+//liza
     private String movieName;
     private String rating;
     private String genre;
