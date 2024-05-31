@@ -1,13 +1,16 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package moviebookingsystem;
 
-import java.util.*;
-import java.io.*;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
 
 class Node {
 
@@ -26,9 +29,9 @@ class Seat {
     private Node head;
     private int rows;
     private int columns;
-    private JFrame frame;
     private JPanel seatPanel;
     private JLabel[][] seatLabels;
+    private static final String DB_URL = "jdbc:sqlite:moviebooking.db";
 
     public Seat(int rows, int columns) {
         this.rows = rows;
@@ -74,8 +77,7 @@ class Seat {
         }
     }
 
-    public void displaySeatingArrangement(JFrame parentFrame) {
-        frame = new JFrame("Seat Selection");
+    public JPanel getSeatPanel() {
         seatPanel = new JPanel(new GridLayout(rows + 1, columns + 1));
         seatLabels = new JLabel[rows][columns];
 
@@ -97,9 +99,9 @@ class Seat {
                     seatLabels[i][j].setBackground(Color.GREEN);
                     int finalI = i;
                     int finalJ = j;
-                    seatLabels[i][j].addMouseListener(new java.awt.event.MouseAdapter() {
-                        public void mouseClicked(java.awt.event.MouseEvent evt) {
-                            selectSeat(finalI, finalJ, parentFrame);
+                    seatLabels[i][j].addMouseListener(new MouseAdapter() {
+                        public void mouseClicked(MouseEvent evt) {
+                            selectSeat(finalI, finalJ);
                         }
                     });
                 }
@@ -109,14 +111,10 @@ class Seat {
             rowChar++;
         }
 
-        frame.add(seatPanel, BorderLayout.CENTER);
-        frame.pack();
-        frame.setLocationRelativeTo(parentFrame);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setVisible(true);
+        return seatPanel;
     }
 
-    private void selectSeat(int row, int column, JFrame parentFrame) {
+    private void selectSeat(int row, int column) {
         String seatChoice = Character.toString((char) ('A' + row)) + (column + 1);
         System.out.println("Seat Selected: " + seatChoice);
 
@@ -125,7 +123,7 @@ class Seat {
             "Please enter your username: ", usernameField
         };
 
-        int option = JOptionPane.showConfirmDialog(frame, message, "Book Seat", JOptionPane.OK_CANCEL_OPTION);
+        int option = JOptionPane.showConfirmDialog(null, message, "Book Seat", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             String username = usernameField.getText();
             if (!username.isEmpty()) {
@@ -133,19 +131,22 @@ class Seat {
                 seatLabels[row][column].setBackground(Color.RED);
                 seatLabels[row][column].removeMouseListener(seatLabels[row][column].getMouseListeners()[0]);
                 updateBookings(username, seatChoice);
-                JOptionPane.showMessageDialog(frame, "Seat successfully booked by " + username + ": " + seatChoice);
+                JOptionPane.showMessageDialog(null, "Seat successfully booked by " + username + ": " + seatChoice);
             } else {
-                JOptionPane.showMessageDialog(frame, "Username cannot be empty.");
+                JOptionPane.showMessageDialog(null, "Username cannot be empty.");
             }
         }
     }
 
     private void updateBookings(String username, String seat) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("Resources/bookings.txt", true))) {
-            writer.write(username + "," + seat + "\n");
-        } catch (IOException e) {
-            System.out.println("An error occurred while updating bookings.");
-            e.printStackTrace();
+        String query = "INSERT INTO bookings (username, seat) VALUES (?, ?)";
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setString(1, username);
+            pstmt.setString(2, seat);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error updating bookings: " + e.getMessage());
         }
     }
 }
