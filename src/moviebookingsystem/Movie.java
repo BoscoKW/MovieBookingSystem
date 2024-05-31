@@ -1,21 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package moviebookingsystem;
 
-import java.util.*;
-
-/**
- *
- * @author mardiliza
- */
 public class Movie {
-//liza
+
     private String movieName;
     private String rating;
     private String genre;
-    private int runningTime; // in minutes
+    private int runningTime;
 
     public Movie(String movieName, String rating, String genre, int runningTime) {
         this.movieName = movieName;

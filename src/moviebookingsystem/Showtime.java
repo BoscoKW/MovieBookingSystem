@@ -1,17 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package moviebookingsystem;
 
-/**
- *
- * @author mardiliza
- */
-
-/**
- * Main class representing the Movie Showtime
- */
 public class Showtime {
 
     private String movieName;
@@ -44,6 +32,6 @@ public class Showtime {
 
     @Override
     public String toString() {
-        return "Date: " + date + "            Time: " + time + "            Cinema: " + cinema + "";
+        return "Date: " + date + " Time: " + time + " Cinema: " + cinema;
     }
 }
