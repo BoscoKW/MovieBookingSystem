@@ -12,34 +12,36 @@ import java.sql.Statement;
 
 public final class Database {
 
-    public static final String USER_NAME = "movie"; //your DB username
-    public static final String PASSWORD = "movie"; //your DB password
-    public static final String URL = "jdbc:derby:MovieBookings;create=true";  //url of the DB host
+    public static final String USER_NAME = "movie"; // your DB username
+    public static final String PASSWORD = "movie"; // your DB password
+    public static final String URL = "jdbc:derby:MovieBookings;create=true"; // url of the DB host
 
-    public static Connection conn;
+    private static Database instance;
+    private static Connection conn;
 
-    public Database() {
+    private Database() {
         establishConnection();
     }
 
-    public static void main(String[] args) {
-        Database database = new Database();
-        System.out.println(database.getConnection());
+    public static Database getInstance() {
+        if (instance == null) {
+            instance = new Database();
+        }
+        return instance;
     }
 
     public Connection getConnection() {
-        return this.conn;
+        return conn;
     }
 
     public void establishConnection() {
-        try{
-            conn=DriverManager.getConnection(URL, USER_NAME, PASSWORD);
+        try {
+            conn = DriverManager.getConnection(URL, USER_NAME, PASSWORD);
             System.out.println(URL + " connected...");
+        } catch (SQLException ex) {
+            System.err.println("SQLException: " + ex.getMessage());
         }
-        catch(SQLException ex){
-            System.err.println("SQLException: " +ex.getMessage());
-        }
-       }
+    }
 
     public void closeConnections() {
         if (conn != null) {
@@ -52,15 +54,11 @@ public final class Database {
     }
 
     public ResultSet queryDB(String sql) {
-
-        Connection connection = this.conn;
         Statement statement = null;
         ResultSet resultSet = null;
-
         try {
-            statement = connection.createStatement();
+            statement = conn.createStatement();
             resultSet = statement.executeQuery(sql);
-
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
         }
@@ -68,17 +66,28 @@ public final class Database {
     }
 
     public void updateDB(String sql) {
-
-        Connection connection = this.conn;
         Statement statement = null;
-        ResultSet resultSet = null;
-
         try {
-            statement = connection.createStatement();
+            statement = conn.createStatement();
             statement.executeUpdate(sql);
-
         } catch (SQLException ex) {
             System.out.println(ex.getMessage());
         }
+    }
+
+    // CRUD methods for customers and bookings
+    public void registerCustomer(String username, String phoneNumber, String emailAddress) {
+        String sql = "INSERT INTO customers(username, phoneNumber, emailAddress) VALUES('" + username + "', '" + phoneNumber + "', '" + emailAddress + "')";
+        updateDB(sql);
+    }
+
+    public ResultSet getBookings(String username) {
+        String sql = "SELECT * FROM bookings WHERE username = '" + username + "'";
+        return queryDB(sql);
+    }
+
+    public void addBooking(String username, String seat) {
+        String sql = "INSERT INTO bookings(username, seat) VALUES('" + username + "', '" + seat + "')";
+        updateDB(sql);
     }
 }
