@@ -1,17 +1,26 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package moviebookingsystem;
 
-public class Showtime {
+/**
+ *
+ * @author mardiliza
+ */
+import java.time.LocalTime;
 
+public class Showtime {
     private String movieName;
     private String date;
     private String time;
-    private String cinema;
+    private String cinemaType;
 
-    public Showtime(String movieName, String date, String time, String cinema) {
+    public Showtime(String movieName, String date, String time, String cinemaType) {
         this.movieName = movieName;
         this.date = date;
         this.time = time;
-        this.cinema = cinema;
+        this.cinemaType = cinemaType;
     }
 
     public String getMovieName() {
@@ -26,12 +35,7 @@ public class Showtime {
         return time;
     }
 
-    public String getCinema() {
-        return cinema;
-    }
-
-    @Override
-    public String toString() {
-        return "Date: " + date + " Time: " + time + " Cinema: " + cinema;
+    public String getCinemaType() {
+        return cinemaType;
     }
 }

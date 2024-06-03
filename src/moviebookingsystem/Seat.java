@@ -1,17 +1,16 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package moviebookingsystem;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
+import java.io.*;
 
+/**
+ *
+ * @author mardiliza
+ */
 class Node {
 
     String data;
@@ -26,12 +25,9 @@ class Node {
 
 class Seat {
 
-    private Node head;
-    private int rows;
-    private int columns;
-    private JPanel seatPanel;
-    private JLabel[][] seatLabels;
-    private static final String DB_URL = "jdbc:sqlite:moviebooking.db";
+    public Node head;
+    public int rows;
+    public int columns;
 
     public Seat(int rows, int columns) {
         this.rows = rows;
@@ -40,7 +36,7 @@ class Seat {
         generateOccupiedSeats();
     }
 
-    private void generateSeats() {
+    public void generateSeats() {
         head = new Node("[ ]");
         Node current = head;
         for (int i = 0; i < rows; i++) {
@@ -57,7 +53,7 @@ class Seat {
         }
     }
 
-    private void generateOccupiedSeats() {
+    public void generateOccupiedSeats() {
         Random random = new Random();
         Set<Integer> occupiedSeats = new HashSet<>();
         int totalSeats = rows * columns;
@@ -77,76 +73,81 @@ class Seat {
         }
     }
 
-    public JPanel getSeatPanel() {
-        seatPanel = new JPanel(new GridLayout(rows + 1, columns + 1));
-        seatLabels = new JLabel[rows][columns];
-
-        seatPanel.add(new JLabel("")); // Empty corner
+    public void displaySeatingArrangement() {
+        System.out.println("============== Cinema Screen ==============");
+        System.out.print("   ");
         for (int j = 1; j <= columns; j++) {
-            seatPanel.add(new JLabel(String.format(" %d ", j), SwingConstants.CENTER));
+            System.out.print(String.format(" %-3s", j));
         }
-
+        System.out.println();
         char rowChar = 'A';
         Node current = head;
         for (int i = 0; i < rows; i++) {
-            seatPanel.add(new JLabel(String.valueOf(rowChar), SwingConstants.CENTER));
+            System.out.print(rowChar + "  ");
             for (int j = 0; j < columns; j++) {
-                seatLabels[i][j] = new JLabel(current.data, SwingConstants.CENTER);
-                seatLabels[i][j].setOpaque(true);
-                if (current.data.equals("[X]")) {
-                    seatLabels[i][j].setBackground(Color.RED);
-                } else {
-                    seatLabels[i][j].setBackground(Color.GREEN);
-                    int finalI = i;
-                    int finalJ = j;
-                    seatLabels[i][j].addMouseListener(new MouseAdapter() {
-                        public void mouseClicked(MouseEvent evt) {
-                            selectSeat(finalI, finalJ);
-                        }
-                    });
-                }
-                seatPanel.add(seatLabels[i][j]);
+                System.out.print(current.data + " ");
                 current = current.next;
             }
+            System.out.println();
             rowChar++;
         }
-
-        return seatPanel;
     }
 
-    private void selectSeat(int row, int column) {
-        String seatChoice = Character.toString((char) ('A' + row)) + (column + 1);
-        System.out.println("Seat Selected: " + seatChoice);
+    public void chooseSeat() {
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.print("\nSelect your seat (e.g. A3): ");
+            String seatChoice = scanner.nextLine().toUpperCase();
 
-        JTextField usernameField = new JTextField();
-        Object[] message = {
-            "Please enter your username: ", usernameField
-        };
+            // Check if the seat choice is in the correct format
+            if (seatChoice.length() != 2 || !Character.isLetter(seatChoice.charAt(0)) || !Character.isDigit(seatChoice.charAt(1))) {
+                System.out.println("Invalid seat format. Please enter a valid seat (e.g., A3).");
+                continue;
+            }
 
-        int option = JOptionPane.showConfirmDialog(null, message, "Book Seat", JOptionPane.OK_CANCEL_OPTION);
-        if (option == JOptionPane.OK_OPTION) {
-            String username = usernameField.getText();
-            if (!username.isEmpty()) {
-                seatLabels[row][column].setText("[X]");
-                seatLabels[row][column].setBackground(Color.RED);
-                seatLabels[row][column].removeMouseListener(seatLabels[row][column].getMouseListeners()[0]);
-                updateBookings(username, seatChoice);
-                JOptionPane.showMessageDialog(null, "Seat successfully booked by " + username + ": " + seatChoice);
+            char rowChoice = seatChoice.charAt(0);
+            int columnChoice = Character.getNumericValue(seatChoice.charAt(1));
+
+            // Check if the row and column choices are within valid range
+            boolean isValidRowChoice = rowChoice >= 'A' && rowChoice < ('A' + rows);
+            boolean isValidColumnChoice = columnChoice >= 1 && columnChoice <= columns;
+
+            if (!isValidRowChoice || !isValidColumnChoice) {
+                System.out.println("Invalid seat choice. Please enter a valid seat within the range.");
+                continue;
+            }
+
+            // Calculate the index of the selected seat in the linked list
+            int index = (rowChoice - 'A') * columns + columnChoice - 1;
+
+            Node current = head;
+            for (int i = 0; i < index; i++) {
+                current = current.next;
+            }
+
+            if (current.data.equals("[X]")) {
+                System.out.println("\nSeat chosen. Please choose another one.");
+                continue;
             } else {
-                JOptionPane.showMessageDialog(null, "Username cannot be empty.");
+                current.data = "[\u001B[31mX\u001B[0m]"; // red X
+                System.out.println("\nPlease enter your username: ");
+                String username = scanner.nextLine();
+
+                String seat = Character.toString(rowChoice) + columnChoice; // Convert row and column to seat format
+                updateBookings(username, seat); // Update bookings with seat format
+
+                System.out.print("\nSeat successfully booked by " + username + ": " + seat);
+                break;
             }
         }
     }
 
-    private void updateBookings(String username, String seat) {
-        String query = "INSERT INTO bookings (username, seat) VALUES (?, ?)";
-        try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement pstmt = conn.prepareStatement(query)) {
-            pstmt.setString(1, username);
-            pstmt.setString(2, seat);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.err.println("Error updating bookings: " + e.getMessage());
+    public void updateBookings(String username, String seat) {
+        try ( BufferedWriter writer = new BufferedWriter(new FileWriter("Resources/bookings.txt", true))) {
+            writer.write(username + "," + seat + "\n");
+        } catch (IOException e) {
+            System.out.println("An error occurred while updating bookings.");
+            e.printStackTrace();
         }
     }
 }
