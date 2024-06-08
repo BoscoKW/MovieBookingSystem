@@ -1,25 +1,18 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package moviebookingsystem;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 public final class Database {
 
-    public static final String USER_NAME = "movie"; // your DB username
-    public static final String PASSWORD = "movie"; // your DB password
-    public static final String URL = "jdbc:derby:MovieBookings;create=true"; // url of the DB host
+    private static final String URL = "jdbc:derby:MovieBookingDB;create=true;"; // URL of the DB host
 
     private static Database instance;
-    private static Connection conn;
+    private Connection conn;
 
-    private Database() {
+    public Database() {
         establishConnection();
     }
 
@@ -31,15 +24,33 @@ public final class Database {
     }
 
     public Connection getConnection() {
-        return conn;
+        return this.conn;
     }
 
-    public void establishConnection() {
-        try {
-            conn = DriverManager.getConnection(URL, USER_NAME, PASSWORD);
-            System.out.println(URL + " connected...");
+    // Establish connection
+    private void establishConnection() {
+        if (this.conn == null) {
+            try {
+                // Load the Derby driver
+                Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+                conn = DriverManager.getConnection(URL);
+                System.out.println("Connected successfully to " + URL);
+            } catch (SQLException ex) {
+                System.out.println("SQL Exception: " + ex.getMessage());
+                ex.printStackTrace(); // Print stack trace for detailed error information
+            } catch (ClassNotFoundException e) {
+                System.out.println("Derby Embedded Driver not found. Make sure the derby.jar is included in the classpath.");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void updateDB(String sql) {
+        try (Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate(sql);
         } catch (SQLException ex) {
-            System.err.println("SQLException: " + ex.getMessage());
+            System.out.println("SQL Exception: " + ex.getMessage());
+            ex.printStackTrace(); // Print stack trace for detailed error information
         }
     }
 
@@ -47,47 +58,34 @@ public final class Database {
         if (conn != null) {
             try {
                 conn.close();
+                System.out.println("Database connection closed.");
             } catch (SQLException ex) {
-                System.out.println(ex.getMessage());
+                System.out.println("SQL Exception: " + ex.getMessage());
+                ex.printStackTrace(); // Print stack trace for detailed error information
             }
         }
     }
 
-    public ResultSet queryDB(String sql) {
-        Statement statement = null;
-        ResultSet resultSet = null;
+    public void shutdown() {
         try {
-            statement = conn.createStatement();
-            resultSet = statement.executeQuery(sql);
+            DriverManager.getConnection("jdbc:derby:;shutdown=true");
         } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
-        }
-        return resultSet;
-    }
-
-    public void updateDB(String sql) {
-        Statement statement = null;
-        try {
-            statement = conn.createStatement();
-            statement.executeUpdate(sql);
-        } catch (SQLException ex) {
-            System.out.println(ex.getMessage());
+            if ("XJ015".equals(ex.getSQLState())) {
+                System.out.println("Derby shutdown successfully.");
+            } else {
+                System.out.println("Derby shutdown failed: " + ex.getMessage());
+                ex.printStackTrace();
+            }
         }
     }
 
-    // CRUD methods for customers and bookings
-    public void registerCustomer(String username, String phoneNumber, String emailAddress) {
-        String sql = "INSERT INTO customers(username, phoneNumber, emailAddress) VALUES('" + username + "', '" + phoneNumber + "', '" + emailAddress + "')";
-        updateDB(sql);
-    }
+    public static void main(String[] args) {
+        Database dbManager = Database.getInstance();
+        System.out.println(dbManager.getConnection());
 
-    public ResultSet getBookings(String username) {
-        String sql = "SELECT * FROM bookings WHERE username = '" + username + "'";
-        return queryDB(sql);
-    }
-
-    public void addBooking(String username, String seat) {
-        String sql = "INSERT INTO bookings(username, seat) VALUES('" + username + "', '" + seat + "')";
-        updateDB(sql);
+        // Ensure the database is shutdown properly
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            dbManager.shutdown();
+        }));
     }
 }

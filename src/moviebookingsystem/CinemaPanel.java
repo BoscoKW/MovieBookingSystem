@@ -1,27 +1,44 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package moviebookingsystem;
+
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.List;
 
 public class CinemaPanel extends JPanel {
+    
+    private Database database;
+    private Connection conn;
+    private Statement statement;
+    
+    public CinemaPanel() {
+        
+        database = new Database();
+        conn = database.getConnection();
+        try {
+            statement = conn.createStatement();
+        } catch (SQLException ex) {
+            System.out.println(ex.getMessage());
+        }
+    }
 
-    private Map<Integer, String> cinemaMap;
+    private static final String[] cinemaData = {
+        "Albany", "Manukau", "Mission Bay", "Newmarket",
+        "Queen Street", "St Lukes", "Sylvia Park", "Westgate"
+    };
 
-    public static Map<Integer, String> getCinemas() {
-        Map<Integer, String> cinemas = new HashMap<>();
-        cinemas.put(1, "Albany");
-        cinemas.put(2, "Manukau");
-        cinemas.put(3, "Mission Bay");
-        cinemas.put(4, "Newmarket");
-        cinemas.put(5, "Queen Street");
-        cinemas.put(6, "St Lukes");
-        cinemas.put(7, "Sylvia Park");
-        cinemas.put(8, "Westgate");
+    public static List<String> getCinemas() {
+        return Arrays.asList(cinemaData);
+    }
 
-        return cinemas;
+    public void addCinemasToDatabase() {
+        Database database = Database.getInstance();
+        for (String cinemaName : cinemaData) {
+            String sql = "INSERT INTO cinemas (name) VALUES ('" + cinemaName + "')";
+            database.updateDB(sql);
+        }
     }
 }

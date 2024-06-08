@@ -13,19 +13,38 @@ public class ShowtimePanel extends JPanel {
     private CardLayout cardLayout;
     private JPanel cardLayoutPanel;
     private String selectedMovie;
+    private MainGUI mainGUI;
 
-    public ShowtimePanel(CardLayout cardLayout, JPanel cardLayoutPanel) {
+    public ShowtimePanel(CardLayout cardLayout, JPanel cardLayoutPanel, MainGUI mainGUI) {
         this.cardLayout = cardLayout;
         this.cardLayoutPanel = cardLayoutPanel;
+        this.mainGUI = mainGUI;
 
         setLayout(new BorderLayout());
 
         JLabel titleLabel = new JLabel("SHOWTIMES", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
         add(titleLabel, BorderLayout.NORTH);
+
+        JPanel mainPanel = new JPanel(new BorderLayout());
+
+        JPanel datesPanel = new JPanel();
+        datesPanel.setLayout(new FlowLayout(FlowLayout.LEFT)); // Flow layout with left alignment
+
+        mainPanel.add(datesPanel, BorderLayout.NORTH);
+
+        JPanel timesPanel = new JPanel();
+        timesPanel.setLayout(new BoxLayout(timesPanel, BoxLayout.Y_AXIS));
+
+        mainPanel.add(new JScrollPane(timesPanel), BorderLayout.CENTER);
+
+        add(mainPanel, BorderLayout.CENTER);
 
         JButton backButton = new JButton("Back");
         backButton.addActionListener(e -> cardLayout.show(cardLayoutPanel, "NowShowingPage"));
         add(backButton, BorderLayout.SOUTH);
+        
+        setPreferredSize(new Dimension(700, 500)); // Adjust size to fit content
     }
 
     public void setSelectedMovie(String selectedMovie) {
@@ -37,19 +56,18 @@ public class ShowtimePanel extends JPanel {
 
         List<Showtime> showtimes = createShowtimes(selectedMovie);
 
+        JPanel mainPanel = (JPanel) getComponent(1);
+        JPanel datesPanel = (JPanel) mainPanel.getComponent(0);
+        JPanel timesPanel = (JPanel) ((JScrollPane) mainPanel.getComponent(1)).getViewport().getView();
+
+        datesPanel.removeAll();
+        timesPanel.removeAll();
+
         if (showtimes.isEmpty()) {
             JLabel noShowtimesLabel = new JLabel("No showtimes available.", SwingConstants.CENTER);
-            add(noShowtimesLabel, BorderLayout.CENTER);
+            timesPanel.add(noShowtimesLabel);
         } else {
             Map<String, List<Showtime>> showtimesByDate = groupShowtimesByDate(showtimes);
-
-            // Create the panel to hold the date buttons
-            JPanel datesPanel = new JPanel();
-            datesPanel.setLayout(new FlowLayout(FlowLayout.LEFT)); // Flow layout with left alignment
-
-            // Create the panel to hold the showtimes
-            JPanel timesPanel = new JPanel();
-            timesPanel.setLayout(new BoxLayout(timesPanel, BoxLayout.Y_AXIS));
 
             // Add date buttons to the dates panel
             for (String date : showtimesByDate.keySet()) {
@@ -68,9 +86,6 @@ public class ShowtimePanel extends JPanel {
                 });
                 datesPanel.add(dateButton);
             }
-
-            add(datesPanel, BorderLayout.NORTH);
-            add(new JScrollPane(timesPanel), BorderLayout.CENTER);
         }
 
         revalidate(); // Refresh panel
@@ -132,18 +147,10 @@ public class ShowtimePanel extends JPanel {
 
     // Method to navigate to the seats page
     private void navigateToSeatsPage(String selectedMovie, String date, String time, String cinema) {
-        // Assuming your main panel is named "mainPanel" and contains both ShowtimePanel and SeatsPanel
-        CardLayout mainCardLayout = (CardLayout) cardLayoutPanel.getLayout();
-        mainCardLayout.show(cardLayoutPanel, "SeatsPage");
-
-    }
-
-    private SeatPanel seatPanel;
-
-    public ShowtimePanel(CardLayout cardLayout, JPanel cardLayoutPanel, SeatPanel seatPanel) {
-        this.cardLayout = cardLayout;
-        this.cardLayoutPanel = cardLayoutPanel;
-        this.seatPanel = seatPanel;
-
+        mainGUI.selectedMovie = selectedMovie;
+        mainGUI.selectedDate = date;
+        mainGUI.selectedTime = time;
+        mainGUI.selectedSeats = cinema;
+        cardLayout.show(cardLayoutPanel, "SeatsPage");
     }
 }

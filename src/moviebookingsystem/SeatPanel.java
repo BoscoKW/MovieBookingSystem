@@ -12,17 +12,15 @@ public class SeatPanel extends JPanel {
 
     private CardLayout cardLayout;
     private JPanel cardLayoutPanel;
-    private String selectedMovie;
-    private String selectedDate;
-    private String selectedTime;
-    private String selectedCinema;
     private JButton[][] seatButtons;
     private Set<String> selectedSeats;
-    private JLabel selectedSeatLabel; 
+    private JLabel selectedSeatLabel;
+    private MainGUI mainGUI;
 
-    public SeatPanel(CardLayout cardLayout, JPanel cardLayoutPanel) {
+    public SeatPanel(CardLayout cardLayout, JPanel cardLayoutPanel, MainGUI mainGUI) {
         this.cardLayout = cardLayout;
         this.cardLayoutPanel = cardLayoutPanel;
+        this.mainGUI = mainGUI;
         this.selectedSeats = new HashSet<>();
 
         setLayout(new BorderLayout());
@@ -77,7 +75,7 @@ public class SeatPanel extends JPanel {
             }
         }
 
-        add(new JScrollPane(seatPanel), BorderLayout.CENTER);
+        add(seatPanel, BorderLayout.CENTER);
 
         // Create label to display selected seat
         selectedSeatLabel = new JLabel("", SwingConstants.CENTER);
@@ -91,6 +89,8 @@ public class SeatPanel extends JPanel {
         proceedButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                // Collect selected seats
+                selectedSeats.forEach(seat -> mainGUI.selectedSeats += seat + " ");
                 // Switch to the PaymentPage
                 cardLayout.show(cardLayoutPanel, "PaymentPage");
             }
@@ -101,6 +101,8 @@ public class SeatPanel extends JPanel {
         buttonPanel.add(proceedButton);
 
         add(buttonPanel, BorderLayout.SOUTH);
+
+        setPreferredSize(new Dimension(900, 700)); // Increase size to fit full seating plan
     }
 
     // Listener class for seat buttons

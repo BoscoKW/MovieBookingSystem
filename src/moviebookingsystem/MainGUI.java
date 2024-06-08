@@ -2,7 +2,8 @@ package moviebookingsystem;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Map;
+import java.util.List;
+import java.util.Arrays;
 
 public class MainGUI extends JFrame {
 
@@ -14,14 +15,30 @@ public class MainGUI extends JFrame {
     private SeatPanel seatPanel;
     private PaymentPanel paymentPanel;
     private TicketPanel ticketPanel;
+    private Database database;
+
+    public String selectedCinema;
+    public String selectedMovie;
+    public String selectedDate;
+    public String selectedTime;
+    public String selectedSeats = "";
 
     public MainGUI() {
         setTitle("Movie Booking System");
-        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
+        // Establish database connection
+        System.out.println("Establishing database connection...");
+        database = Database.getInstance();
+        
+        // Add shutdown hook to close the database properly
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            database.shutdown();
+        }));
+
         // Create main panel with CardLayout
+        System.out.println("Initializing CardLayout...");
         cardLayout = new CardLayout();
         cardLayoutPanel = new JPanel(cardLayout);
         mainPanel = new JPanel(new GridBagLayout());
@@ -32,54 +49,65 @@ public class MainGUI extends JFrame {
         mainPanel.add(cardLayoutPanel, gbc);
 
         // Create cinema selection panel
+        System.out.println("Creating cinema selection panel...");
         JPanel cinemaSelectionPanel = createCinemaSelectionPanel();
         cardLayoutPanel.add(cinemaSelectionPanel, "CinemaSelectionPage");
 
         // Create Now Showing panel with the modified MoviePanel
+        System.out.println("Creating Now Showing panel...");
         JPanel nowShowingPanel = createNowShowingPanel();
         cardLayoutPanel.add(nowShowingPanel, "NowShowingPage");
 
         // Create Showtime panel
-        showtimePanel = new ShowtimePanel(cardLayout, cardLayoutPanel);
+        System.out.println("Creating Showtime panel...");
+        showtimePanel = new ShowtimePanel(cardLayout, cardLayoutPanel, this);
         cardLayoutPanel.add(showtimePanel, "ShowtimePage");
 
         // Create Seats panel
-        seatPanel = new SeatPanel(cardLayout, cardLayoutPanel);
-        cardLayoutPanel.add(seatPanel, "SeatsPage"); // Add SeatsPanel to cardLayoutPanel
+        System.out.println("Creating Seats panel...");
+        seatPanel = new SeatPanel(cardLayout, cardLayoutPanel, this);
+        cardLayoutPanel.add(seatPanel, "SeatsPage");
 
         // Create Payment panel
-        paymentPanel = new PaymentPanel(cardLayout, cardLayoutPanel); // Pass cardLayout and cardLayoutPanel to PaymentPanel
+        System.out.println("Creating Payment panel...");
+        paymentPanel = new PaymentPanel(cardLayout, cardLayoutPanel, this);
         cardLayoutPanel.add(paymentPanel, "PaymentPage");
 
         // Create Ticket panel
-        ticketPanel = new TicketPanel("", "", "", "", "", "");
+        System.out.println("Creating Ticket panel...");
+        ticketPanel = new TicketPanel();
         cardLayoutPanel.add(ticketPanel, "TicketPage");
+
+        // Set default size for the frame
+        setSize(800, 600);
 
         // Add main panel to frame
         add(mainPanel);
+        System.out.println("Initialization complete.");
     }
 
     private JPanel createCinemaSelectionPanel() {
         JPanel cinemaSelectionPanel = new JPanel(new BorderLayout());
         JLabel cinemasLabel = new JLabel("CINEMAS", SwingConstants.CENTER);
+        cinemasLabel.setFont(new Font("Arial", Font.BOLD, 18));
         cinemaSelectionPanel.add(cinemasLabel, BorderLayout.NORTH);
 
         JPanel selectCinemaPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        Map<Integer, String> cinemas = CinemaPanel.getCinemas();
-        String[] cinemaNames = new String[cinemas.size() + 1];
-        cinemaNames[0] = "Select Cinema";
-        int index = 1;
-        for (String cinemaName : cinemas.values()) {
-            cinemaNames[index++] = cinemaName;
+        List<String> cinemas = getCinemas();
+        DefaultComboBoxModel<String> cinemaModel = new DefaultComboBoxModel<>();
+        cinemaModel.addElement("Select Cinema");
+        for (String cinema : cinemas) {
+            cinemaModel.addElement(cinema);
         }
-        cinemaComboBox = new JComboBox<>(cinemaNames);
+        cinemaComboBox = new JComboBox<>(cinemaModel);
         cinemaComboBox.setPreferredSize(new Dimension(300, 40));
+        
         selectCinemaPanel.add(cinemaComboBox);
 
         JButton setCinemaButton = new JButton("Set Cinema");
         setCinemaButton.setPreferredSize(new Dimension(150, 40));
         setCinemaButton.addActionListener(e -> {
-            String selectedCinema = (String) cinemaComboBox.getSelectedItem();
+            selectedCinema = (String) cinemaComboBox.getSelectedItem();
             if (!selectedCinema.equals("Select Cinema")) {
                 cardLayout.show(cardLayoutPanel, "NowShowingPage");
             } else {
@@ -89,6 +117,8 @@ public class MainGUI extends JFrame {
         selectCinemaPanel.add(setCinemaButton);
 
         cinemaSelectionPanel.add(selectCinemaPanel, BorderLayout.CENTER);
+        cinemaSelectionPanel.setPreferredSize(new Dimension(500, 300)); // Adjust size to fit content
+
         return cinemaSelectionPanel;
     }
 
@@ -102,29 +132,33 @@ public class MainGUI extends JFrame {
         JButton backButton = new JButton("Back");
         backButton.addActionListener(e -> cardLayout.show(cardLayoutPanel, "CinemaSelectionPage"));
 
-        JPanel buttonPanel = new JPanel(new BorderLayout());
-        buttonPanel.add(backButton, BorderLayout.WEST);
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.add(backButton);
 
         JButton setMovieButton = new JButton("Select Movie");
         setMovieButton.setPreferredSize(new Dimension(150, 40));
         setMovieButton.addActionListener(e -> {
-            String selectedMovie = (String) moviePanel.getSelectedMovie();
+            selectedMovie = moviePanel.getSelectedMovie();
             if (selectedMovie != null) {
-                // Set the selected movie in the ShowtimePanel
                 showtimePanel.setSelectedMovie(selectedMovie);
-
-                // Proceed to the showtime page
                 cardLayout.show(cardLayoutPanel, "ShowtimePage");
             } else {
                 JOptionPane.showMessageDialog(this, "Please select a movie.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        buttonPanel.add(setMovieButton, BorderLayout.CENTER);
-
+        buttonPanel.add(setMovieButton);
         nowShowingPanel.add(buttonPanel, BorderLayout.SOUTH);
 
+        nowShowingPanel.setPreferredSize(new Dimension(800, 400)); // Adjust size to fit content
+
         return nowShowingPanel;
+    }
+
+    // Method to get the list of cinemas (updated to use specified names)
+    private List<String> getCinemas() {
+        return Arrays.asList("Albany", "Manukau", "Mission Bay", "Newmarket",
+                             "Queen Street", "St Lukes", "Sylvia Park", "Westgate");
     }
 
     public static void main(String[] args) {
@@ -132,5 +166,10 @@ public class MainGUI extends JFrame {
             MainGUI gui = new MainGUI();
             gui.setVisible(true);
         });
+    }
+
+    // Method to update the ticket panel with selected details
+    public void updateTicketPanel() {
+        ticketPanel.updateTicketInfo(selectedCinema, selectedMovie, selectedDate, selectedTime, "", selectedSeats);
     }
 }
