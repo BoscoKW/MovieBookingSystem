@@ -30,22 +30,5 @@ public class CustomerPanel extends JPanel {
         emailAddressField = new JTextField();
         add(emailAddressField);
 
-        JButton registerButton = new JButton("Register");
-        registerButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                registerCustomer();
-            }
-        });
-        add(registerButton);
-    }
-
-    private void registerCustomer() {
-        String username = usernameField.getText();
-        String phoneNumber = phoneNumberField.getText();
-        String emailAddress = emailAddressField.getText();
-
-        Database.getInstance().registerCustomer(username, phoneNumber, emailAddress);
-        JOptionPane.showMessageDialog(this, "User registered successfully!");
     }
 }
