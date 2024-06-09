@@ -8,13 +8,15 @@ import java.util.Arrays;
 public class MainGUI extends JFrame {
 
     private JPanel mainPanel;
-    private JComboBox<String> cinemaComboBox;
     private CardLayout cardLayout;
     private JPanel cardLayoutPanel;
     private ShowtimePanel showtimePanel;
     private SeatPanel seatPanel;
     private PaymentPanel paymentPanel;
     private TicketPanel ticketPanel;
+    private WelcomePanel welcomePanel;
+    private RetrieveTicketPanel retrieveTicketPanel;
+    private CustomerPanel customerPanel;
     private Database database;
 
     public String selectedCinema;
@@ -31,7 +33,7 @@ public class MainGUI extends JFrame {
         // Establish database connection
         System.out.println("Establishing database connection...");
         database = Database.getInstance();
-        
+
         // Add shutdown hook to close the database properly
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             database.shutdown();
@@ -48,35 +50,37 @@ public class MainGUI extends JFrame {
         gbc.gridy = 0;
         mainPanel.add(cardLayoutPanel, gbc);
 
-        // Create cinema selection panel
-        System.out.println("Creating cinema selection panel...");
+        // Create and add panels to the card layout
+        welcomePanel = new WelcomePanel(this);
+        cardLayoutPanel.add(welcomePanel, "WelcomePage");
+
         JPanel cinemaSelectionPanel = createCinemaSelectionPanel();
         cardLayoutPanel.add(cinemaSelectionPanel, "CinemaSelectionPage");
 
-        // Create Now Showing panel with the modified MoviePanel
-        System.out.println("Creating Now Showing panel...");
         JPanel nowShowingPanel = createNowShowingPanel();
         cardLayoutPanel.add(nowShowingPanel, "NowShowingPage");
 
-        // Create Showtime panel
-        System.out.println("Creating Showtime panel...");
         showtimePanel = new ShowtimePanel(cardLayout, cardLayoutPanel, this);
         cardLayoutPanel.add(showtimePanel, "ShowtimePage");
 
-        // Create Seats panel
-        System.out.println("Creating Seats panel...");
         seatPanel = new SeatPanel(cardLayout, cardLayoutPanel, this);
         cardLayoutPanel.add(seatPanel, "SeatsPage");
 
-        // Create Payment panel
-        System.out.println("Creating Payment panel...");
         paymentPanel = new PaymentPanel(cardLayout, cardLayoutPanel, this);
         cardLayoutPanel.add(paymentPanel, "PaymentPage");
 
-        // Create Ticket panel
-        System.out.println("Creating Ticket panel...");
-        ticketPanel = new TicketPanel();
+        ticketPanel = new TicketPanel(this);
         cardLayoutPanel.add(ticketPanel, "TicketPage");
+        
+        retrieveTicketPanel = new RetrieveTicketPanel(this);
+        cardLayoutPanel.add(retrieveTicketPanel, "RetrieveTicketPage");
+
+        // Add CustomerPanel
+        customerPanel = new CustomerPanel();
+        cardLayoutPanel.add(customerPanel, "CustomerPanel");
+
+        // Show welcome page initially
+        cardLayout.show(cardLayoutPanel, "WelcomePage");
 
         // Set default size for the frame
         setSize(800, 600);
@@ -99,9 +103,9 @@ public class MainGUI extends JFrame {
         for (String cinema : cinemas) {
             cinemaModel.addElement(cinema);
         }
-        cinemaComboBox = new JComboBox<>(cinemaModel);
+        JComboBox<String> cinemaComboBox = new JComboBox<>(cinemaModel);
         cinemaComboBox.setPreferredSize(new Dimension(300, 40));
-        
+
         selectCinemaPanel.add(cinemaComboBox);
 
         JButton setCinemaButton = new JButton("Set Cinema");
@@ -117,7 +121,7 @@ public class MainGUI extends JFrame {
         selectCinemaPanel.add(setCinemaButton);
 
         cinemaSelectionPanel.add(selectCinemaPanel, BorderLayout.CENTER);
-        cinemaSelectionPanel.setPreferredSize(new Dimension(500, 300)); // Adjust size to fit content
+        cinemaSelectionPanel.setPreferredSize(new Dimension(400, 200)); // Adjust size to fit content
 
         return cinemaSelectionPanel;
     }
@@ -150,7 +154,7 @@ public class MainGUI extends JFrame {
         buttonPanel.add(setMovieButton);
         nowShowingPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        nowShowingPanel.setPreferredSize(new Dimension(800, 400)); // Adjust size to fit content
+        nowShowingPanel.setPreferredSize(new Dimension(600, 300)); // Adjust size to fit content
 
         return nowShowingPanel;
     }
@@ -158,7 +162,11 @@ public class MainGUI extends JFrame {
     // Method to get the list of cinemas (updated to use specified names)
     private List<String> getCinemas() {
         return Arrays.asList("Albany", "Manukau", "Mission Bay", "Newmarket",
-                             "Queen Street", "St Lukes", "Sylvia Park", "Westgate");
+                "Queen Street", "St Lukes", "Sylvia Park", "Westgate");
+    }
+
+    public Database getDatabase() {
+        return database;
     }
 
     public static void main(String[] args) {
@@ -168,8 +176,27 @@ public class MainGUI extends JFrame {
         });
     }
 
-    // Method to update the ticket panel with selected details
+    public void showWelcomePage() {
+        cardLayout.show(cardLayoutPanel, "WelcomePage");
+    }
+
+    public void showBookingPage() {
+        cardLayout.show(cardLayoutPanel, "CinemaSelectionPage");
+    }
+
+    public void showCustomerPanel() {
+        cardLayout.show(cardLayoutPanel, "CustomerPanel");
+    }
+
     public void updateTicketPanel() {
         ticketPanel.updateTicketInfo(selectedCinema, selectedMovie, selectedDate, selectedTime, "", selectedSeats);
+    }
+
+    public void showTicketPanel() {
+        cardLayout.show(cardLayoutPanel, "TicketPage");
+    }
+    
+     public void showRetrieveTicketPage() {
+        cardLayout.show(cardLayoutPanel, "RetrieveTicketPage");
     }
 }
