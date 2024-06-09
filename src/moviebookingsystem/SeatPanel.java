@@ -102,7 +102,7 @@ public class SeatPanel extends JPanel {
 
         add(buttonPanel, BorderLayout.SOUTH);
 
-        setPreferredSize(new Dimension(900, 700)); // Increase size to fit full seating plan
+        setPreferredSize(new Dimension(800, 600)); // Increase size to fit full seating plan
     }
 
     // Listener class for seat buttons

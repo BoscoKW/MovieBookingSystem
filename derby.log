@@ -1,19 +1,19 @@
 ----------------------------------------------------------------
-Sat Jun 08 19:09:14 NZST 2024:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-018f-f6ae-1233-00000f205e80 
-on database directory /Users/bosco/Desktop/MovieBookingSystem(2)/MovieBookingDB with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@5c0369c4 
-Loaded from file:/Users/bosco/Desktop/MovieBookingSystem(2)/lib/derby.jar
+Sun Jun 09 16:33:07 NZST 2024:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-018f-fb45-804a-000007208b60 
+on database directory /Users/mardiliza/Desktop/MovieBookingGUI/MovieBookingDB with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@5c0369c4 
+Loaded from file:/Users/mardiliza/Desktop/MovieBookingGUI/lib/derby.jar
 java.vendor=Oracle Corporation
-java.runtime.version=11.0.21+9-LTS-193
-user.dir=/Users/bosco/Desktop/MovieBookingSystem(2)
+java.runtime.version=11.0.22+9-LTS-219
+user.dir=/Users/mardiliza/Desktop/MovieBookingGUI
 os.name=Mac OS X
 os.arch=aarch64
-os.version=14.5
+os.version=14.4.1
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
 ----------------------------------------------------------------
-Sat Jun 08 19:09:18 NZST 2024: Shutting down Derby engine
+Sun Jun 09 16:33:10 NZST 2024: Shutting down Derby engine
 ----------------------------------------------------------------
-Sat Jun 08 19:09:18 NZST 2024:
-Shutting down instance a816c00e-018f-f6ae-1233-00000f205e80 on database directory /Users/bosco/Desktop/MovieBookingSystem(2)/MovieBookingDB with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@5c0369c4 
+Sun Jun 09 16:33:10 NZST 2024:
+Shutting down instance a816c00e-018f-fb45-804a-000007208b60 on database directory /Users/mardiliza/Desktop/MovieBookingGUI/MovieBookingDB with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@5c0369c4 
 ----------------------------------------------------------------

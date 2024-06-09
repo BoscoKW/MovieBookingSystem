@@ -11,6 +11,7 @@ public class PaymentPanel extends JPanel {
     private JTextField cardNumberField;
     private JTextField expiryField;
     private JTextField cvvField;
+    private JTextField nameField;
     private CardLayout cardLayout;
     private JPanel cardLayoutPanel;
     private MainGUI mainGUI;
@@ -30,9 +31,22 @@ public class PaymentPanel extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        JLabel cardLabel = new JLabel("Card number (xxxx xxxx xxxx xxxx):");
+        JLabel nameLabel = new JLabel("Name:");
         gbc.gridx = 0;
         gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        paymentInfoPanel.add(nameLabel, gbc);
+
+        nameField = new JTextField(20);
+        nameField.setPreferredSize(new Dimension(150, 25));
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        paymentInfoPanel.add(nameField, gbc);
+
+        JLabel cardLabel = new JLabel("Card number:");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.EAST;
         paymentInfoPanel.add(cardLabel, gbc);
 
@@ -40,13 +54,13 @@ public class PaymentPanel extends JPanel {
         cardNumberField.setPreferredSize(new Dimension(150, 25));
         ((AbstractDocument) cardNumberField.getDocument()).setDocumentFilter(new CardNumberDocumentFilter());
         gbc.gridx = 1;
-        gbc.gridy = 0;
+        gbc.gridy = 1;
         gbc.anchor = GridBagConstraints.WEST;
         paymentInfoPanel.add(cardNumberField, gbc);
 
         JLabel expLabel = new JLabel("Expiry (MM/YY):");
         gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.EAST;
         paymentInfoPanel.add(expLabel, gbc);
 
@@ -54,13 +68,13 @@ public class PaymentPanel extends JPanel {
         expiryField.setPreferredSize(new Dimension(50, 25));
         ((AbstractDocument) expiryField.getDocument()).setDocumentFilter(new ExpiryDocumentFilter());
         gbc.gridx = 1;
-        gbc.gridy = 1;
+        gbc.gridy = 2;
         gbc.anchor = GridBagConstraints.WEST;
         paymentInfoPanel.add(expiryField, gbc);
 
-        JLabel cvvLabel = new JLabel("CVV (xxx):");
+        JLabel cvvLabel = new JLabel("CVV:");
         gbc.gridx = 0;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.EAST;
         paymentInfoPanel.add(cvvLabel, gbc);
 
@@ -68,7 +82,7 @@ public class PaymentPanel extends JPanel {
         cvvField.setPreferredSize(new Dimension(30, 25));
         ((AbstractDocument) cvvField.getDocument()).setDocumentFilter(new CVVDocumentFilter());
         gbc.gridx = 1;
-        gbc.gridy = 2;
+        gbc.gridy = 3;
         gbc.anchor = GridBagConstraints.WEST;
         paymentInfoPanel.add(cvvField, gbc);
 
@@ -81,27 +95,35 @@ public class PaymentPanel extends JPanel {
                 String cardNumber = cardNumberField.getText();
                 String expiry = expiryField.getText();
                 String cvv = cvvField.getText();
+                String name = nameField.getText();
 
-                if (cardNumber.matches("\\d{4} \\d{4} \\d{4} \\d{4}") &&
-                        expiry.matches("\\d{2}/\\d{2}") &&
-                        cvv.matches("\\d{3}")) {
+                if  (cardNumber.matches("\\d{4} ?\\d{4} ?\\d{4} ?\\d{4}") || cardNumber.matches("\\d{16}")
+                        && expiry.matches("\\d{2}/\\d{2}")
+                        && cvv.matches("\\d{3}")
+                        && !name.isEmpty()) {
                     JOptionPane.showMessageDialog(PaymentPanel.this, "Payment successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
                     mainGUI.updateTicketPanel(); // Update the ticket panel with the selected details
-                    cardLayout.show(cardLayoutPanel, "TicketPage");
+                    mainGUI.getDatabase().storeTicketInfo(name, mainGUI.selectedCinema, mainGUI.selectedMovie, mainGUI.selectedDate, mainGUI.selectedTime, mainGUI.selectedSeats);
+                    navigateToCustomerPanel();
                 } else {
                     JOptionPane.showMessageDialog(PaymentPanel.this, "Invalid payment details. Please check again.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
-        
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(confirmButton);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        setPreferredSize(new Dimension(600, 300)); // Adjust size to fit content
+        setPreferredSize(new Dimension(400, 250)); // Adjust size to fit content
+    }
+
+    private void navigateToCustomerPanel() {
+        cardLayout.show(cardLayoutPanel, "CustomerPanel");
     }
 
     private static class CardNumberDocumentFilter extends DocumentFilter {
+
         @Override
         public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
             if (string == null) {
@@ -138,6 +160,7 @@ public class PaymentPanel extends JPanel {
     }
 
     private static class ExpiryDocumentFilter extends DocumentFilter {
+
         @Override
         public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
             if (string == null) {
@@ -174,6 +197,7 @@ public class PaymentPanel extends JPanel {
     }
 
     private static class CVVDocumentFilter extends DocumentFilter {
+
         @Override
         public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
             if (string == null) {
@@ -200,6 +224,7 @@ public class PaymentPanel extends JPanel {
             if (fb.getDocument().getLength() - length + text.length() > 3) {
                 return;
             }
+
             for (int i = 0; i < sb.length(); i++) {
                 if (!Character.isDigit(sb.charAt(i))) {
                     return;
