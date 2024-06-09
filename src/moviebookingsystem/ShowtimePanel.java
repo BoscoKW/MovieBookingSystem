@@ -44,7 +44,7 @@ public class ShowtimePanel extends JPanel {
         backButton.addActionListener(e -> cardLayout.show(cardLayoutPanel, "NowShowingPage"));
         add(backButton, BorderLayout.SOUTH);
         
-        setPreferredSize(new Dimension(700, 500)); // Adjust size to fit content
+        setPreferredSize(new Dimension(600, 400)); // Adjust size to fit content
     }
 
     public void setSelectedMovie(String selectedMovie) {

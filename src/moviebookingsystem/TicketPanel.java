@@ -7,8 +7,10 @@ public class TicketPanel extends JPanel {
 
     private JLabel ticketLabel;
     private JTextArea ticketInfo;
+    private MainGUI mainGUI;
 
-    public TicketPanel() {
+    public TicketPanel(MainGUI mainGUI) {
+        this.mainGUI = mainGUI;
         setLayout(new BorderLayout());
 
         ticketLabel = new JLabel("Your Ticket", SwingConstants.CENTER);
@@ -23,25 +25,22 @@ public class TicketPanel extends JPanel {
         ticketInfo.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         add(ticketInfo, BorderLayout.CENTER);
 
-        JButton backButton = new JButton("Back to Main Page");
-        backButton.addActionListener(e -> {
-            // Logic to navigate back to the main page
-            // Assuming mainPanel is the cardLayoutPanel in MainGUI
-            ((CardLayout) getParent().getLayout()).show(getParent(), "CinemaSelectionPage");
-        });
-
-        add(backButton, BorderLayout.SOUTH);
+        JButton backButtonToMain = new JButton("Back to Main Page");
+        backButtonToMain.addActionListener(e -> mainGUI.showWelcomePage());
+        JPanel buttonToMainPanel = new JPanel(new FlowLayout(FlowLayout.CENTER)); // Align right
+        buttonToMainPanel.add(backButtonToMain);
+        add(buttonToMainPanel, BorderLayout.SOUTH);
     }
 
     public void updateTicketInfo(String cinema, String movie, String date, String time, String cinemaType, String seats) {
         ticketInfo.setText(String.format(
-            "Ticket Information:\n\n" +
-            "Cinema: %s\n" +
-            "Movie: %s\n" +
-            "Date: %s\n" +
-            "Time: %s\n" +
-            "Seats: %s\n",
-            cinema, movie, date, time, seats
+                "Ticket Information:\n\n"
+                + "Cinema: %s\n"
+                + "Movie: %s\n"
+                + "Date: %s\n"
+                + "Time: %s\n"
+                + "Seats: %s\n",
+                cinema, movie, date, time, seats
         ));
     }
 }
